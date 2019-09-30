@@ -124,7 +124,7 @@ uid=1001(u1) gid=1001(groupe1) groups=1001(groupe1)
 >id u3
 
 ```
-uid=1003(u3) gid=1005(u3) groups=1005(u3),1002(groupe2)
+uid=1003(u3) gid=1002(u3) groups=1002(groupe2)
 ```
 
 #### Quel est l’id du groupe groupe1 ?
@@ -136,3 +136,62 @@ gid=1001(groupe1)
 gid=1002(groupe2)
 
 #### Retirez l’utilisateur u3 du groupe groupe2. Que se passe-t-il ? Expliquez.
+
+>id u3
+
+```
+uid=1003(u3) gid=1002(groupe2) groups=1002(groupe2)
+```
+
+>sudo gpasswd -d u3 groupe2
+
+```
+Removing user u3 from group groupe2
+gpasswd: user 'u3' is not a member of 'groupe2'
+```
+
+>id u3
+
+```
+uid=1003(u3) gid=1002(groupe2) groups=1005(u3)
+```
+
+On ne peut pas l'enlever du groupe car c'est le groupe primaire
+
+#### Modifiez le compte de u4 de sorte que :
+#### — il expire au 1er juin 2020
+#### — il faut changer de mot de passe avant 90 jours
+#### — il faut attendre 5 jours pour modifier un mot de passe
+#### — l’utilisateur est averti 14 jours avant l’expiration de son mot de passe
+#### — le compte sera bloqué 30 jours après expiration du mot de passe
+
+```
+sudo chage --mindays 90 u4
+sudo chage --mindays 5 u4
+sudo chage --maxdays 90 u4
+sudo chage --inactive 30 u4
+sudo chage --warndays 14 u4
+sudo chage --expire 2020/06/01 u4
+sudo chage -l u4
+
+Last password change                                    : juin 01, 2019
+Password expires                                        : août 30, 2019
+Password inactive                                       : sept. 29, 2019
+Account expires                                         : juin 01, 2020
+Minimum number of days between password change          : 5
+Maximum number of days between password change          : 90
+Number of days of warning before password expires       : 14
+```
+
+#### à quoi correspond l’utilisateur nobody ?
+
+Dans la plupart des variantes d'Unix, nobody (personne en anglais) est le nom conventionnel d'un compte d'utilisateur à qui aucun fichier n'appartient, qui n'est dans aucun groupe qui a des privilèges et dont les seules possibilités sont celles que tous les "autres utilisateurs" ont.
+
+#### Par défaut, combien de temps la commande sudo conserve-t-elle votre mot de passe en mémoire ? Quelle commande permet de forcer sudo à oublier votre mot de passe ?
+
+la commande sudo conserve le mot de passe pendant 15 minutes
+
+la commande qui permert de forcer sudo a oublier le mot de passe est : 
+>sudo -K
+
+## Exercice 2
