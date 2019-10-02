@@ -209,7 +209,7 @@ Donc pour le proprietaire et son groupe, il y les droits de lecture et d'ecritur
 
 #### Retirez tous les droits sur ce fichier (même pour vous), puis essayez de le modifier et de l’afficher en tant que root. Conclusion ?
 
->chmod ugo-rwx fichier$
+>chmod ugo-rwx fichier
 
 il est alors impossible de lire ou ecrire dans le fichier
 
@@ -308,3 +308,108 @@ touch: cannot touch 'test/essai': Permission denied
 execution signifie que l'on ne peut pas acceder au fichier donc ni lire et ecrire dedans
 
 ####  Rétablissez le droit en exécution du répertoire test. Positionnez vous dans ce répertoire et retirez lui à nouveau le droit d’exécution. Essayez de créer, supprimer et modifier un fichier dans le répertoire test, de vous déplacer dans ssrep, de lister son contenu. Qu’en concluez-vous quant à l’influence des droits que l’on possède sur le répertoire courant ? Peut-on retourner dans le répertoire parent avec ”cd ..” ? Pouvez-vous donner une explication ?
+
+
+>chmod ugo+x test
+
+>chmod ugo-x ../test
+
+On ne peut plus rien faire, un fois que l'on quitte le repertoire, nous ne pouvons plus y retourner car nous n'avons plus les droit d'execution donc on ne peut plus acceder au dossier
+
+#### Rétablissez le droit en exécution du répertoire test. Attribuez au fichier fichier les droits suffisants pour qu’une autre personne de votre groupe puisse y accéder en lecture, mais pas en écriture.
+
+>chmod ugo+x test
+
+>chmod go-w test/fichier
+
+#### Définissez un umask très restrictif qui interdit à quiconque à part vous l’accès en lecture ou en écriture, ainsi que la traversée de vos répertoires. Testez sur un nouveau fichier et un nouveau répertoire.
+
+```
+mkdir test2
+touch fichier2
+umask 077
+umask -S
+```
+
+>u=rwx,g=,o=
+
+```
+stat -c %a fichier2
+```
+
+>666
+
+#### Définissez un umask très permissif qui autorise tout le monde à lire vos fichiers et traverser vos répertoires, mais n’autorise que vous à écrire. Testez sur un nouveau fichier et un nouveau répertoire.
+
+```
+umask 022
+umask -S
+mkdir test3
+touch test3/fichier3
+```
+
+>u=rwx,g=rx,o=rx
+
+```
+stat -c %a test3
+```
+>755
+
+```
+stat -c %a test3/fichier3
+```
+>644
+
+#### Définissez un umask équilibré qui vous autorise un accès complet et autorise un accès en lecture aux membres de votre groupe. Testez sur un nouveau fichier et un nouveau répertoire.
+
+```
+umask 027
+umask -S
+mkdir test4
+touch test3/fichier4
+```
+
+>u=rwx,g=rx,o=
+
+```
+stat -c %a test3
+```
+>750
+
+```
+stat -c %a test4/fichier4
+```
+>640
+
+#### Transcrivez les commandes suivantes de la notation classique à la notation octale ou vice-versa (vous
+#### pourrez vous aider de la commande stat pour valider vos réponses) :
+#### - chmod u=rx,g=wx,o=r fic
+#### - chmod uo+w,g-rx fic en sachant que les droits initiaux de fic sont r--r-x---
+#### - chmod 653 fic en sachant que les droits initiaux de fic sont 711
+#### - chmod u+x,g=w,o-r fic en sachant que les droits initiaux de fic sont r--r-x---
+
+*   chmod u=rx,g=wx,o=r -> chmod 534
+
+*   chmod uo+w,g-rx en sachant que les droits initiaux de fic sont r--r-x--- -> chmod 602
+
+*   chmod 653 -> chmod u=rw,g=rx,o=rx
+
+*   chmod u+x,g=w,o-r en sachant que les droits initiaux de fic sont r--r-x--- -> chmod 520
+
+#### Affichez les droits sur le programme passwd. Que remarquez-vous ? En affichant les droits du fichier /etc/passwd, pouvez-vous justifier les permissions sur le programme passwd ?
+
+>ls -l /usr/bin | grep "passwd" 
+
+```
+-rwsr-xr-x 1 root   root       63736 mars  22  2019 passwd
+```
+
+donc toul le mond peut ecrire et exectuer avec l'uid de root mais seul root peut lire le fichier
+
+>stat -c %a /etc/passwd
+
+```
+644
+```
+
+Cela est normal car seul root peut lire le fichier mais tout les utilisateur peuvent ecrire leur mot de pass dedans
