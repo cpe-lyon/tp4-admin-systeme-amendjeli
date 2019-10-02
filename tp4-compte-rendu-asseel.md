@@ -1,10 +1,6 @@
 # Compte Rendu TP4 Asseel
 
-## Exercice 1
-
-
-
-### 1) Exercice 1. Gestion des utilisateurs et des groupes
+## Exercice 1  Gestion des utilisateurs et des groupes
 
 #### Commencez par créer deux groupes groupe1 et groupe2
 
@@ -194,4 +190,121 @@ la commande sudo conserve le mot de passe pendant 15 minutes
 la commande qui permert de forcer sudo a oublier le mot de passe est : 
 >sudo -K
 
-## Exercice 2
+## Exercice 2 Gestion des permissions
+
+####  Dans votre $HOME, créez un dossier test, et dans ce dossier un fichier fichier contenant quelques lignes de texte. Quels sont les droits sur test et fichier ?
+
+>stat -c %a test
+```
+775
+```
+
+Donc pour le proprietaire et son groupe, il y a les tout les droits et tout les droits sauf l'ecriture pour les autres
+
+>stat -c %a test/fichier
+```
+664
+```
+Donc pour le proprietaire et son groupe, il y les droits de lecture et d'ecriture et seulement le droits de lecture pour les autres
+
+#### Retirez tous les droits sur ce fichier (même pour vous), puis essayez de le modifier et de l’afficher en tant que root. Conclusion ?
+
+>chmod ugo-rwx fichier$
+
+il est alors impossible de lire ou ecrire dans le fichier
+
+>sudo su
+
+>cat fichier
+
+```
+hollow world
+```
+
+il est possible de passer a travers les restriction en root
+
+#### Redonnez vous les droits en écriture et exécution sur fichier puis exécutez la commande echo "echo Hello" > fichier. On a vu lors des TP précédents que cette commande remplace le contenu d’un fichier s’il existe déjà. Que peut-on dire au sujet des droits ?
+
+>chmod ugo+wx fichier
+
+>"echo Hello" > fichier
+
+il est possible d'ecrire mais impossible de lire sauf en root
+
+#### Essayez d’exécuter le fichier. Est-ce que cela fonctionne ? Et avec sudo ? Expliquez
+
+>./fichier
+
+```
+bash: ./fichier: Permission denied
+```
+
+>sudo ./fichier
+
+```
+hello
+```
+
+Il est necessaire d'avoir les authorisation d'ecriture pour pouvoir executer un fichier
+
+#### Placez-vous dans le répertoire test, et retirez-vous le droit en lecture pour ce répertoire. Listez le contenu du répertoire, puis exécutez ou affichez le contenu du fichier fichier. Qu’en déduisez-vous ? Rétablissez le droit en lecture sur test
+
+>chmod ugo-r ../test
+
+>ls
+
+```
+ls: cannot open directory '.': Permission denied
+```
+
+>./fichier
+
+```
+bash: ./fichier: Permission denied
+```
+
+Il est necessaire d'avoir les droits de lecture dans le doosier qui coontient pour executer fichier ou lire le contenu d'un dossier
+
+#### Créez dans test un fichier nouveau ainsi qu’un répertoire sstest. Retirez au fichier nouveau et au répertoire test le droit en écriture. Tentez de modifier le fichier nouveau. Rétablissez ensuite le droit en écriture au répertoire test. Tentez de modifier le fichier nouveau, puis de le supprimer. Que pouvezvous déduire de toutes ces manipulations ?
+
+```
+chmod ugo-r nouveau
+chmod ugo-r ../test
+echo "echo Hello" > nouveau
+```
+
+>-bash: nouveau: Permission denied
+
+```
+chmod ugo+r ../test
+echo "echo Hello" > nouveau
+```
+
+>-bash: nouveau: Permission denied
+
+```
+rm nouveau
+```
+
+>rm: remove write-protected regular empty file 'nouveau'? y
+
+on peut supprimer un un fichier si on peut ecrire dans le dossier qui le contient meme si on ne peut pas ecrire sur le fichier
+
+#### Positionnez vous dans votre répertoire personnel, puis retirez le droit en exécution du répertoire test. Tentez de créer, supprimer, ou modifier un fichier dans le répertoire test, de vous y déplacer, d’en lister le contenu, etc…Qu’en déduisez vous quant au sens du droit en exécution pour les répertoires ?
+
+>chmod ugo-x test
+
+>touch test/essai
+
+```
+touch: cannot touch 'test/essai': Permission denied
+```
+>echo "echo Hello" > test/nouveau
+
+```
+-bash: test/nouveau: Permission denied
+```
+
+execution signifie que l'on ne peut pas acceder au fichier donc ni lire et ecrire dedans
+
+####  Rétablissez le droit en exécution du répertoire test. Positionnez vous dans ce répertoire et retirez lui à nouveau le droit d’exécution. Essayez de créer, supprimer et modifier un fichier dans le répertoire test, de vous déplacer dans ssrep, de lister son contenu. Qu’en concluez-vous quant à l’influence des droits que l’on possède sur le répertoire courant ? Peut-on retourner dans le répertoire parent avec ”cd ..” ? Pouvez-vous donner une explication ?
